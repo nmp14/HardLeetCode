@@ -9,7 +9,7 @@ const cond6 = "aaaabbaaabbaaa123456A"; //expected 3
 console.log(cond6.length);
 
 // Functions for checking if pw contains a lower, upper, or numeric char
-const hasLowerAlpha = str => {
+const hasLowerAlpha = (str: string): boolean => {
     let code, i, len;
 
     for (i = 0, len = str.length; i < len; i++) {
@@ -20,7 +20,7 @@ const hasLowerAlpha = str => {
     }
     return false;
 }
-const hasUpperAlpha = str => {
+const hasUpperAlpha = (str: string): boolean => {
     let code, i, len;
 
     for (i = 0, len = str.length; i < len; i++) {
@@ -31,7 +31,7 @@ const hasUpperAlpha = str => {
     }
     return false;
 }
-const hasNumber = str => {
+const hasNumber = (str: string): boolean => {
     let code, i, len;
 
     for (i = 0, len = str.length; i < len; i++) {
@@ -45,7 +45,11 @@ const hasNumber = str => {
 
 // Element for storing in queue.  Holds the string ele, priority, and original string (ele gets mutated)
 class QEle {
-    constructor(ele, prio, os) {
+    public ele: string;
+    public prio: number;
+    public os: string;
+
+    constructor(ele: string, prio: number, os: string) {
         this.ele = ele;
         this.prio = prio;
         this.os = os;
@@ -53,11 +57,12 @@ class QEle {
 }
 // Priority Queue
 class PrioQue {
+    public subStrings: QEle[];
     constructor() {
         this.subStrings = [];
     }
 
-    enqueue(ele, prio, os) {
+    enqueue(ele: string, prio: number, os: string) {
         const qEle = new QEle(ele, prio, os);
         let contain = false;
         // Determine where element goes in queue list by priorty. Currently lower number = higher prio (using modulus to see how divisible by 3 a number is)
@@ -79,7 +84,6 @@ class PrioQue {
     }
 
     dequeue() {
-        if (this.isEmpty()) return 'Empty';
         return this.subStrings.shift();
     }
 
@@ -88,7 +92,7 @@ class PrioQue {
     }
 }
 // Function for handling 3+ consecutive letters/digits
-const checkForThreeConsDigits = function(password) {
+const checkForThreeConsDigits = function(password: string) {
     let incSteps = 0;
     let arrOfQueItems = [];
     
@@ -118,12 +122,12 @@ const checkForThreeConsDigits = function(password) {
         while (toDelete && !prioQue.isEmpty()) {
             const firstEle = prioQue.dequeue();
             // Cut off the third element of string. 3rd ele is most effecient in all scenarios. aaa, aaaa, aaaaa.  Cutting off the first causes more steps in aaaa and aaaaa.
-            firstEle.ele = firstEle.ele.slice(0, 2) + firstEle.ele.slice(3);
+            firstEle!.ele = firstEle!.ele.slice(0, 2) + firstEle!.ele.slice(3);
             // Increase steps now that we deleted a char
             incSteps++;
             // If the length is still > 2, add it back to queue as it cam still be a candidate for more deletions based on its prio and remaining toDelete count.
             // If queue runs out before toDelete, it's fine, rest gets removed in the strongPAsswordChecker function body.
-            if (firstEle.ele.length > 2) prioQue.enqueue(firstEle.ele, firstEle.ele.length % 3, firstEle.os);
+            if (firstEle!.ele.length > 2) prioQue.enqueue(firstEle!.ele, firstEle!.ele.length % 3, firstEle!.os);
             // If string length is less than 3, we just add it to an arr of queue items that we will replace parts of the string with.
             else arrOfQueItems.push(firstEle);
             toDelete--;
@@ -133,14 +137,14 @@ const checkForThreeConsDigits = function(password) {
             arrOfQueItems.push(ele);
         }
         // Make sure the os are sorted shortest to longest to ensure the correct string building below
-        arrOfQueItems.sort((a, b) => a.os.length - b.os.length);
+        arrOfQueItems.sort((a, b) => a!.os.length - b!.os.length);
         // Loop through queue items and replace the password cons substrings with the shortened versions.
         // We need to actually replace them instead of just increment steps due to need to go through and check for remaining cons substrings if they were > chars to be deleted.
         for (const ele of arrOfQueItems) {
             for (let i = 0; i < password.length; i++) {
                 // Check to make sure we are on the correct substring to replace (or one that is the same).  Need shortest os to acheive in this manner.
-                if (password.substring(i, i + ele.os.length) === ele.os && password[i] !== password[i + ele.os.length] && password[i - 1] !== password[i]) {
-                    password = password.slice(0, i) + ele.ele + password.slice(i + ele.os.length);
+                if (password.substring(i, i + ele!.os.length) === ele!.os && password[i] !== password[i + ele!.os.length] && password[i - 1] !== password[i]) {
+                    password = password.slice(0, i) + ele!.ele + password.slice(i + ele!.os.length);
                     break;
                 }
             }
@@ -164,6 +168,7 @@ const checkForThreeConsDigits = function(password) {
             }
 
             if (!hasNumber(password)) {
+                // @ts-ignore
                 if (isNaN(password[i + 2])) {
                     password = password.slice(0, i + 2) + "1" + password.slice(i + 3);
                     incSteps++;
@@ -184,7 +189,7 @@ const checkForThreeConsDigits = function(password) {
  * @param {string} password
  * @return {number}
  */
-var strongPasswordChecker = function(password) {
+var strongPasswordChecker = function(password: string) {
     let steps = 0;
     const len = password.length;
     
